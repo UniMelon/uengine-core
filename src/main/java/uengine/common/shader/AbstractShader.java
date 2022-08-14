@@ -1,11 +1,17 @@
 package uengine.common.shader;
 
+import org.joml.Matrix4d;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL46;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.FloatBuffer;
 
+import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL20C.glDeleteShader;
 import static org.lwjgl.opengl.GL46.*;
 
@@ -13,6 +19,8 @@ public abstract class AbstractShader {
     private final int programId;
     private final int vertexShaderId;
     private final int fragmentShaderId;
+
+    private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
 
     public AbstractShader(String vertexFile, String fragmentFile) {
         vertexShaderId = loadShader(vertexFile, GL46.GL_VERTEX_SHADER);
@@ -24,6 +32,31 @@ public abstract class AbstractShader {
         bindAttributes();
         glLinkProgram(programId); // связывает шейдеры вместе
         glValidateProgram(programId);
+        findUniformLocations();
+    }
+
+    protected abstract void findUniformLocations();
+
+    protected int getUniformLocation(String uniformName) {
+        return glGetUniformLocation(programId, uniformName);
+    }
+
+    protected void setFloat1f(int location, float value) {
+        glUniform1f(location, value);
+    }
+
+    protected void setVector3f(int location, Vector3f vector) {
+        glUniform3f(location, vector.x, vector.y, vector.z);
+    }
+
+    protected void setMaxrix4f(int location, Matrix4f matrix) {
+        matrix.get(matrixBuffer);
+        matrixBuffer.flip();
+        glUniformMatrix4fv(location, false, matrixBuffer);
+    }
+
+    protected void setBoolean(int location, boolean value) {
+        glUniform1i(location, value ? 1:0);
     }
 
     public void start() {
