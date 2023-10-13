@@ -21,7 +21,7 @@ public class StaticShader extends AbstractShader{
 
     @Override
     protected void findUniformLocations() {
-        location_mat4 = super.getUniformLocation("transformationMatrix");
+        this.location_mat4 = super.getUniformLocation("transformationMatrix");
     }
 
     public void setMatrix4f(Matrix4f matrix) {

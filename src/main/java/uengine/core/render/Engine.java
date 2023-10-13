@@ -1,5 +1,7 @@
 package uengine.core.render;
 
+import org.joml.Vector3f;
+import uengine.common.model.Entity;
 import uengine.common.model.RawModel;
 import uengine.common.model.Texture;
 import uengine.common.model.TexturedModel;
@@ -61,12 +63,21 @@ public class Engine {
         Texture texture = new Texture(i);
         TexturedModel texturedModel = new TexturedModel(model, texture);
 
+        Entity entity = new Entity(texturedModel, new Vector3f(0,0,0), 0, 0, 0, 1);
+
         while(!this.windowManager.isCloseRequest()) {
             renderFromVao.prepare();
 
             texture.bind();
             shader.start();
-            renderFromVao.render(texturedModel);
+
+            entity.increasePosition(0.1f,0,0);
+            entity.getPosition().x+=0.1f;
+            if (entity.getPosition().x>=1.5f)
+                entity.getPosition().x=-1.5f;
+
+//            renderFromVao.render(texturedModel);
+            renderFromVao.render(entity, shader);
             shader.stop();
             texture.unBind();
             this.windowManager.update();

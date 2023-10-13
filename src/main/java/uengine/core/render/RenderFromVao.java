@@ -1,7 +1,11 @@
 package uengine.core.render;
 
+import org.joml.Matrix4f;
+import uengine.common.model.Entity;
 import uengine.common.model.RawModel;
 import uengine.common.model.TexturedModel;
+import uengine.common.shader.StaticShader;
+import uengine.common.util.Maths;
 
 import static org.lwjgl.opengl.GL46.*;
 
@@ -21,16 +25,37 @@ public class RenderFromVao {
 //        glBindVertexArray(0);
 //    }
 
-    public void render(TexturedModel texturedModel) {
-        RawModel model = texturedModel.getRawModel();
+//    public void render(TexturedModel texturedModel) {
+//        RawModel model = texturedModel.getRawModel();
+//
+//        glBindVertexArray(model.getVaoId());
+//        glEnableVertexAttribArray(0);// активировать список аттрибутов, в котором хранятся данные
+//        glEnableVertexAttribArray(1);
+////        glDrawArrays(GL_TRIANGLES, 0, texturedModel.getVertexCount()); // указать что визуализировать
+//        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, texturedModel.getTexture().getId());
+//        glDrawElements(GL_TRIANGLES, model.getVertexCount(), GL_UNSIGNED_INT, 0);
+//        glDisableVertexAttribArray(0);
+//        glDisableVertexAttribArray(1);
+//        glBindVertexArray(0);
+//    }
 
-        glBindVertexArray(model.getVaoId());
+    public void render(Entity entity, StaticShader shader) {
+        TexturedModel model = entity.getModel();
+        RawModel rawModel = model.getRawModel();
+
+        glBindVertexArray(rawModel.getVaoId());
         glEnableVertexAttribArray(0);// активировать список аттрибутов, в котором хранятся данные
         glEnableVertexAttribArray(1);
-//        glDrawArrays(GL_TRIANGLES, 0, texturedModel.getVertexCount()); // указать что визуализировать
+
+        Matrix4f matrix = Maths.createTransformationMatrix(
+                entity.getPosition(), entity.getRx(), entity.getRy(), entity.getRz(), entity.getScale());
+
+        shader.setMatrix4f(matrix);
+
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texturedModel.getTexModel().getId());
-        glDrawElements(GL_TRIANGLES, model.getVertexCount(), GL_UNSIGNED_INT, 0);
+        glBindTexture(GL_TEXTURE_2D, model.getTexture().getId());
+        glDrawElements(GL_TRIANGLES, rawModel.getVertexCount(), GL_UNSIGNED_INT, 0);
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glBindVertexArray(0);
